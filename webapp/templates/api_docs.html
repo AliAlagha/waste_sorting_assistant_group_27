@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>API documentation</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui.css">
+</head>
+<body style="margin:0">
+<div style="padding:14px 24px;background:#fff;border-bottom:1px solid #F1F1F4;font-family:Inter,system-ui,sans-serif;font-size:14px"><a href="{{ url_for('index') }}" style="color:#1E7F4F;text-decoration:none">&larr; Back to the app</a></div>
+<div id="swagger"></div>
+<script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-bundle.js"></script>
+<script>SwaggerUIBundle({url: "{{ url_for('api_openapi') }}", dom_id: "#swagger"});</script>
+<noscript>Raw spec: <a href="{{ url_for('api_openapi') }}">openapi.json</a></noscript>
+</body>
+</html>

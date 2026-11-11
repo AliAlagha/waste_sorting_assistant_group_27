@@ -1,0 +1,15 @@
+{
+  "_comment": "Maps every class the model can predict to a disposal category (recyclable | compostable | landfill). Keys must match the model's labels (see models/<model>/config.json -> id2label). Labels are normalised: lower-case, '_' and ' ' become '-'. Defaults below fit the 12-class Kaggle 'Garbage Classification' dataset. Adjust together with the Recycling Recommendation subsystem.",
+  "battery": "landfill",
+  "biological": "compostable",
+  "brown-glass": "recyclable",
+  "cardboard": "recyclable",
+  "clothes": "recyclable",
+  "green-glass": "recyclable",
+  "metal": "recyclable",
+  "paper": "recyclable",
+  "plastic": "recyclable",
+  "shoes": "landfill",
+  "trash": "landfill",
+  "white-glass": "recyclable"
+}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Welcome{% endblock %}
+{% block content %}
+<div class="stack">
+    <section class="intro">
+        <h2>Not sure which bin it goes in?</h2>
+        <p>Take a photo of a waste item. An AI model recognises it, the app tells you the right bin in Dortmund
+           and your next collection day, and the city sees what is thrown away.</p>
+        <div class="actions">
+            <a class="btn btn-primary" href="{{ url_for('register') }}"><i class="ti ti-user-plus"></i>Create an account</a>
+            <a class="btn btn-light" href="{{ url_for('guide') }}"><i class="ti ti-book"></i>Open the sorting guide</a>
+        </div>
+    </section>
+
+    <section class="grid grid-4">
+        {% for icon, title, text in [
+            ("camera", "AI classification", "A Vision Transformer recognises 12 kinds of waste and shows how sure it is."),
+            ("book", "Recycling recommendations", "Local EDG rules: the right bin, how to prepare the item and the collection days."),
+            ("chart-pie", "History and statistics", "Every scan is saved without personal data and analysed for the city."),
+            ("plug-connected", "User interface and integration", "Accounts, roles, REST API and the OpenAI sustainability coach.")] %}
+        <div class="card card-body feature">
+            <div class="icon-box"><i class="ti ti-{{ icon }}"></i></div>
+            <h3>{{ title }}</h3>
+            <p>{{ text }}</p>
+        </div>
+        {% endfor %}
+    </section>
+</div>
+{% endblock %}

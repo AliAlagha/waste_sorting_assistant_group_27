@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% from "_macros.html" import category_badge, empty_state, delta, stat %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="stack">
+    <div class="toolbar">
+        <p class="muted">{{ stats.region_filter if stats.region_filter != 'All' else 'All regions' }}, last {{ stats.date_filter }} days</p>
+        <form method="get" data-loading="Updating…">
+            <label class="field"><span>Region</span><select class="input" name="region">{% for r in regions %}<option {% if r == stats.region_filter %}selected{% endif %}>{{ r }}</option>{% endfor %}</select></label>
+            <label class="field"><span>Period</span><select class="input" name="days">{% for d in date_filters %}<option value="{{ d }}" {% if d == stats.date_filter %}selected{% endif %}>Last {{ d }} days</option>{% endfor %}</select></label>
+            <button class="btn btn-primary" type="submit">Apply</button>
+            <a class="btn btn-light" href="{{ url_for('export_csv', region=stats.region_filter, days=stats.date_filter) }}"><i class="ti ti-download"></i>CSV</a>
+        </form>
+    </div>
+
+    {% if stats.scans == 0 %}
+    <div class="card">{{ empty_state("chart-pie", "No scans in this period", "Choose a longer period or another region.", url_for('dashboard'), "Reset filters") }}</div>
+    {% else %}
+    <section class="grid grid-4">
+        {% call stat(stats.scans, "Scans") %}{{ delta(stats.scans, stats.previous.scans if stats.previous.scans else none) }}{% endcall %}
+        {% call stat(stats.recycling_rate ~ "%", "Recycling rate") %}{{ delta(stats.recycling_rate, stats.previous.recycling_rate if stats.previous.scans else none, " pts") }}{% endcall %}
+        {{ stat(stats.waste_composition.get("Compostable", 0), "Compostable items") }}
+        {{ stat(stats.waste_composition.get("Landfill", 0), "Landfill items") }}
+    </section>
+
+    <section class="grid grid-2">
+        <div class="card chart"><img alt="Waste composition" src="data:image/png;base64,{{ stats.charts.composition }}"></div>
+        <div class="card chart"><img alt="Recycling rate per week" src="data:image/png;base64,{{ stats.charts.trend }}"></div>
+        <div class="card chart"><img alt="Most common items" src="data:image/png;base64,{{ stats.charts.common_items }}"></div>
+        <div class="card chart"><img alt="Scans per region" src="data:image/png;base64,{{ stats.charts.regions }}"></div>
+    </section>
+
+    <div class="card">
+        <div class="card-header"><div><h2>AI insights</h2><p class="muted">OpenAI reads the numbers of this view: an observation, a trend and an action for the city</p></div>
+            <button id="insights-button" class="btn btn-light btn-sm" type="button" data-busy="Analysing…"
+                    data-url="{{ url_for('api_insights', region=stats.region_filter, days=stats.date_filter) }}"><i class="ti ti-sparkles"></i>Generate</button></div>
+        <div class="card-body" id="insights" hidden></div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h2>Latest scans</h2><span class="muted">no personal data is stored</span></div>
+        <div class="table-wrap">
+            <table class="table">
+                <tr><th>Date</th><th>Region</th><th>Item</th><th>Category</th><th>AI confidence</th></tr>
+                {% for s in scans %}
+                <tr><td>{{ s.scan_date.strftime('%d %b %Y') }}</td><td>{{ s.region_name }}</td><td class="strong">{{ s.item_name }}</td>
+                    <td>{{ category_badge(s.category) }}</td>
+                    <td>{% if s.confidence is not none %}{{ (s.confidence * 100)|round|int }}%{% endif %}</td>
+</tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

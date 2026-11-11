@@ -1,0 +1,33 @@
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: waste_sorting
+      MYSQL_USER: waste
+      MYSQL_PASSWORD: waste_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 20
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "5050:5000"   # open http://localhost:5050 (5000 is used by AirPlay on macOS)
+    environment:
+      DATABASE_URL: mysql+pymysql://waste:waste_password@db:3306/waste_sorting?charset=utf8mb4
+      SECRET_KEY: ${SECRET_KEY:-change-me}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}     # read from the file .env
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-6-luna}
+      SEED_DEMO_DATA: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:

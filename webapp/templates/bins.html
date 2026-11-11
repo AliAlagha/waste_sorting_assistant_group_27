@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "_macros.html" import bin_label %}
+{% block title %}Collection days{% endblock %}
+{% block content %}
+<div class="stack">
+    {% if plan.has_address %}
+    <div class="alert alert-primary"><i class="ti ti-map-pin"></i><span>Real dates from EDG Entsorgung Dortmund for <b>{{ plan.address }}</b>, holiday changes included.</span></div>
+    {% else %}
+    <div class="alert"><i class="ti ti-map-pin"></i><span>No address saved, so only the usual rhythm in {{ plan.region_name }} is shown.</span>
+        <a class="btn btn-light btn-sm" href="{{ url_for('profile') }}">Add address</a></div>
+    {% endif %}
+    <section class="grid grid-4">
+        {% for b in plan.bins %}
+        <div class="card bin-card">
+            <div class="bin-top">
+                {{ bin_label(b.bin_name) }}
+                {% if b.days_until is not none %}
+                <span class="badge {{ 'badge-primary' if b.days_until <= 1 else 'badge-gray' }}">
+                    {{ 'today' if b.days_until == 0 else ('tomorrow' if b.days_until == 1 else 'in ' ~ b.days_until ~ ' days') }}</span>
+                {% endif %}
+            </div>
+            <dl>
+                <dt>Day</dt><dd>{{ b.pickup_day }}</dd>
+                {% if b.rhythm %}<dt>Rhythm</dt><dd>{{ b.rhythm }}</dd>{% endif %}
+                {% if b.next_pickup %}<dt>Next</dt><dd>{{ b.next_pickup }}</dd>{% endif %}
+                {% if b.accepts %}<dt>For</dt><dd>{{ b.accepts|join(', ') }}</dd>{% endif %}
+            </dl>
+        </div>
+        {% endfor %}
+    </section>
+    <p class="muted">Glass, clothes and batteries are not collected at home. See the <a href="{{ url_for('guide') }}">sorting guide</a> for where they go.</p>
+</div>
+{% endblock %}

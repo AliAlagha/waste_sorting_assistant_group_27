@@ -1,0 +1,715 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "AI Waste Sorting and Recycling Assistant API",
+    "version": "1.2.0",
+    "description": "Capstone project Group 27, FH Dortmund. Log in to get a token, then send it as 'Authorization: Bearer <token>'."
+  },
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "summary": "Register a citizen account",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "201": {
+            "description": "created"
+          },
+          "400": {
+            "description": "invalid input"
+          },
+          "409": {
+            "description": "username taken"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "password"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "region_name": {
+                    "type": "string"
+                  },
+                  "street": {
+                    "type": "string"
+                  },
+                  "house_number": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Log in and get a session token (valid 1 hour)",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "token"
+          },
+          "401": {
+            "description": "wrong username or password"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "password"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "summary": "End the session",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "logged out"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/scans": {
+      "post": {
+        "summary": "Scan a photo: classification + recommendation + coach, saved in the history",
+        "tags": [
+          "scans"
+        ],
+        "responses": {
+          "201": {
+            "description": "combined result"
+          },
+          "400": {
+            "description": "invalid image"
+          },
+          "401": {
+            "description": "not logged in"
+          },
+          "413": {
+            "description": "file too large"
+          },
+          "503": {
+            "description": "model not available"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scans/history": {
+      "get": {
+        "summary": "Scans of the logged-in user",
+        "tags": [
+          "scans"
+        ],
+        "responses": {
+          "200": {
+            "description": "list of scans"
+          },
+          "401": {
+            "description": "not logged in"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/dashboard": {
+      "get": {
+        "summary": "Statistics for municipalities",
+        "tags": [
+          "dashboard"
+        ],
+        "responses": {
+          "200": {
+            "description": "statistics"
+          },
+          "400": {
+            "description": "bad filter"
+          },
+          "401": {
+            "description": "not logged in"
+          },
+          "403": {
+            "description": "not a municipality user"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "region",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "All"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 30
+            }
+          }
+        ]
+      }
+    },
+    "/api/dashboard/export.csv": {
+      "get": {
+        "summary": "Export the filtered scans as CSV",
+        "tags": [
+          "dashboard"
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV file"
+          },
+          "403": {
+            "description": "not a municipality user"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "region",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "All"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 30
+            }
+          }
+        ]
+      }
+    },
+    "/api/account": {
+      "delete": {
+        "summary": "Delete my account (scans stay only as anonymous statistics)",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "deleted"
+          },
+          "401": {
+            "description": "not logged in"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/health": {
+      "get": {
+        "summary": "Health of the app and its subsystems",
+        "tags": [
+          "system"
+        ],
+        "responses": {
+          "200": {
+            "description": "status"
+          }
+        }
+      }
+    },
+    "/api/me": {
+      "get": {
+        "summary": "My account",
+        "tags": [
+          "me"
+        ],
+        "responses": {
+          "200": {
+            "description": "account"
+          },
+          "401": {
+            "description": "not logged in"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "summary": "Change region and address",
+        "tags": [
+          "me"
+        ],
+        "responses": {
+          "200": {
+            "description": "updated account"
+          },
+          "400": {
+            "description": "invalid input"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "region_name"
+                ],
+                "properties": {
+                  "region_name": {
+                    "type": "string"
+                  },
+                  "street": {
+                    "type": "string"
+                  },
+                  "house_number": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/me/password": {
+      "post": {
+        "summary": "Change my password",
+        "tags": [
+          "me"
+        ],
+        "responses": {
+          "200": {
+            "description": "changed"
+          },
+          "400": {
+            "description": "wrong current password or too short"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "old_password",
+                  "new_password"
+                ],
+                "properties": {
+                  "old_password": {
+                    "type": "string"
+                  },
+                  "new_password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/me/schedule": {
+      "get": {
+        "summary": "Collection plan of my address (real EDG dates) or the usual rhythm",
+        "tags": [
+          "me"
+        ],
+        "responses": {
+          "200": {
+            "description": "bins with next pickup"
+          },
+          "401": {
+            "description": "not logged in"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/rules": {
+      "get": {
+        "summary": "All local recycling rules (sorting guide)",
+        "tags": [
+          "guide"
+        ],
+        "responses": {
+          "200": {
+            "description": "list of rules"
+          }
+        }
+      }
+    },
+    "/api/coach/ask": {
+      "post": {
+        "summary": "Ask the AI sustainability coach a free question",
+        "tags": [
+          "guide"
+        ],
+        "responses": {
+          "200": {
+            "description": "answer and source"
+          },
+          "401": {
+            "description": "not logged in"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "question"
+                ],
+                "properties": {
+                  "question": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/insights": {
+      "get": {
+        "summary": "AI insights (OpenAI) about the filtered dashboard numbers",
+        "tags": [
+          "dashboard"
+        ],
+        "responses": {
+          "200": {
+            "description": "3 bullet points and source"
+          },
+          "403": {
+            "description": "not a municipality user"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "region",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "All"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 30
+            }
+          }
+        ]
+      }
+    },
+    "/api/system/stats": {
+      "get": {
+        "summary": "Request log statistics and subsystem health (admin)",
+        "tags": [
+          "system"
+        ],
+        "responses": {
+          "200": {
+            "description": "stats"
+          },
+          "403": {
+            "description": "not an admin"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "hours",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 24
+            }
+          }
+        ]
+      }
+    },
+    "/api/admin/users": {
+      "get": {
+        "summary": "All users with their roles",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "list of users"
+          },
+          "403": {
+            "description": "not an admin"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a user (also municipality and admin accounts)",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "created"
+          },
+          "400": {
+            "description": "invalid input"
+          },
+          "409": {
+            "description": "username taken"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "password",
+                  "role"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string"
+                  },
+                  "region_name": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users/{user_id}": {
+      "patch": {
+        "summary": "Change the role of a user (the user is logged out)",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "updated user"
+          },
+          "400": {
+            "description": "own role or unknown role"
+          },
+          "404": {
+            "description": "not found"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "role"
+                ],
+                "properties": {
+                  "role": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete a user (scans stay anonymous)",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "deleted"
+          },
+          "400": {
+            "description": "own account"
+          },
+          "404": {
+            "description": "not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

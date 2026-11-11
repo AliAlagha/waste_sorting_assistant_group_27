@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% from "_macros.html" import address_fields %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<div class="card center-page">
+    <div class="card-header"><div><h2>Create an account</h2><p class="muted">Free for every citizen</p></div></div>
+    <form class="card-body form" method="post" data-loading="Creating your account…">
+        <label class="field"><span>Username</span><input class="input" name="username" value="{{ old.get('username', '') }}" minlength="3" required></label>
+        <label class="field"><span>Password</span><input class="input" name="password" type="password" minlength="6" required autocomplete="new-password"><small>At least 6 characters</small></label>
+        {{ address_fields(regions, old.get('region_name', 'Dortmund'), old.get('street', ''), old.get('house_number', '')) }}
+        <button class="btn btn-primary btn-block" type="submit">Create account</button>
+    </form>
+</div>
+{% endblock %}

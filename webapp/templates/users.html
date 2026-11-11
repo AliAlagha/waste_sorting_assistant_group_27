@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Users and roles{% endblock %}
+{% block content %}
+<div class="stack">
+    <div class="card">
+        <div class="card-header"><div><h2>Add a user</h2><p class="muted">Municipality and admin accounts can only be created here. Citizens register themselves.</p></div></div>
+        <form class="card-body toolbar" method="post" data-loading="Creating user…">
+            <label class="field"><span>Username</span><input class="input" name="username" value="{{ old.get('username', '') }}" minlength="3" required></label>
+            <label class="field"><span>Password</span><input class="input" name="password" type="password" minlength="6" required autocomplete="new-password"></label>
+            <label class="field"><span>Role</span><select class="input" name="role">{% for r in roles %}<option {{ 'selected' if r == old.get('role', 'municipality') }}>{{ r }}</option>{% endfor %}</select></label>
+            <label class="field"><span>City</span><select class="input" name="region_name">{% for r in regions %}<option {{ 'selected' if r == old.get('region_name', 'Dortmund') }}>{{ r }}</option>{% endfor %}</select></label>
+            <button class="btn btn-primary" type="submit"><i class="ti ti-user-plus"></i>Add</button>
+        </form>
+    </div>
+    <div class="card">
+        <div class="card-header"><h2>All users</h2><span class="muted">{{ users|length }} accounts</span></div>
+        <div class="table-wrap">
+            <table class="table">
+                <tr><th>Username</th><th>City</th><th>Since</th><th>Role</th><th></th></tr>
+                {% for u in users %}
+                <tr>
+                    <td class="strong">{{ u.username }}{% if u.user_id == account.get_user_id() %} <small>(you)</small>{% endif %}</td>
+                    <td>{{ u.region_name }}</td>
+                    <td>{{ u.created_at }}</td>
+                    <td>
+                        {% if u.user_id == account.get_user_id() %}
+                            <span class="badge badge-primary">{{ u.role }}</span>
+                        {% else %}
+                        <form method="post" action="{{ url_for('change_role', user_id=u.user_id) }}" class="inline-form" data-loading="Saving…">
+                            <select class="input input-sm" name="role" onchange="this.form.requestSubmit()">
+                                {% for r in roles %}<option {{ 'selected' if r == u.role }}>{{ r }}</option>{% endfor %}
+                            </select>
+                        </form>
+                        {% endif %}
+                    </td>
+                    <td class="actions">
+                        {% if u.user_id != account.get_user_id() %}
+                        <form method="post" action="{{ url_for('delete_user', user_id=u.user_id) }}" onsubmit="return confirm('Delete {{ u.username }}? Their scans stay only as anonymous statistics.')">
+                            <button class="btn btn-light btn-sm" type="submit" title="Delete user"><i class="ti ti-trash"></i></button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

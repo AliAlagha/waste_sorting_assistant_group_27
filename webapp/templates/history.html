@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "_macros.html" import category_badge, empty_state, stat %}
+{% block title %}My history{% endblock %}
+{% block content %}
+{% if report.scans == 0 %}
+<div class="card">{{ empty_state("history", "No scans yet", "Every item you scan is listed here.", url_for('scan'), "Scan your first item") }}</div>
+{% else %}
+<div class="stack">
+    <section class="grid grid-4">
+        {{ stat(report.scans, "Items scanned") }}
+        {{ stat(report.recycling_rate ~ "%", "Recyclable") }}
+        {{ stat(report.waste_composition.get("Landfill", 0), "Landfill items") }}
+        {{ stat(report.waste_composition.get("Compostable", 0), "Compostable items") }}
+    </section>
+    <div class="card">
+        <div class="card-header"><h2>Past scans</h2><span class="muted">latest {{ report.history|length }}</span></div>
+        <div class="table-wrap">
+            <table class="table">
+                <tr><th>Date</th><th>Item</th><th>Category</th><th>Bin</th><th>AI confidence</th></tr>
+                {% for s in report.history %}
+                <tr>
+                    <td>{{ s.scan_date.strftime('%d %b %Y, %H:%M') }}</td>
+                    <td class="strong">{{ s.item_name }}</td>
+                    <td>{{ category_badge(s.category) }}</td>
+                    <td>{{ s.bin_name }}</td>
+                    <td>{% if s.confidence is not none %}{{ (s.confidence * 100)|round|int }}%{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

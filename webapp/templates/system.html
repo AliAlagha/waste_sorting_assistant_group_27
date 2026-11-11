@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% from "_macros.html" import empty_state, stat %}
+{% block title %}API log{% endblock %}
+{% block content %}
+{% set h = stats.health %}
+<div class="stack">
+    <p class="muted">Every request is written to the table <code>request_log</code> (requirement "log every API request"). Last {{ stats.hours }} hours.</p>
+    <div class="card">
+        <div class="card-header"><h2>Subsystems</h2></div>
+        <div class="table-wrap">
+            <table class="table">
+                <tr><th>Subsystem</th><th>Status</th><th>Details</th></tr>
+                <tr><td class="strong">Database</td><td><span class="badge {{ 'badge-success' if h.database else 'badge-danger' }}">{{ 'up' if h.database else 'down' }}</span></td><td>MySQL</td></tr>
+                <tr><td class="strong">AI classification</td><td><span class="badge badge-success">up</span></td><td>{{ h.classifier }}</td></tr>
+                <tr><td class="strong">Recycling recommendations</td><td><span class="badge badge-success">up</span></td><td>{{ h.recycling_rules }} rules loaded</td></tr>
+                <tr><td class="strong">OpenAI coach</td><td><span class="badge {{ 'badge-success' if h.openai_coach else 'badge-danger' }}">{{ 'up' if h.openai_coach else 'not configured' }}</span></td><td>{{ 'enabled' if h.openai_coach else 'OPENAI_API_KEY is missing' }}</td></tr>
+            </table>
+        </div>
+    </div>
+    {% set st = stats.storage %}
+    <div class="card">
+        <div class="card-header"><div><h2>Where the data is stored</h2><p class="muted">MySQL server (set with <code>DATABASE_URL</code>)</p></div></div>
+        <div class="card-body">
+            <dl class="facts">
+                <dt>Database</dt><dd><code>{{ st.location }}</code></dd>
+                {% for table, rows in st.tables.items() %}<dt>{{ table }}</dt><dd>{{ rows }} rows</dd>{% endfor %}
+                <dt>In memory only</dt><dd>login sessions (1 hour), EDG street lists</dd>
+                <dt>Never stored</dt><dd>photos, plain passwords (only salted hashes), addresses in scans</dd>
+            </dl>
+        </div>
+    </div>
+    {% if stats.requests %}
+    <section class="grid grid-4">
+        {{ stat(stats.requests, "Requests", stats.users ~ " users · " ~ stats.total_scans ~ " scans saved") }}
+        {{ stat(stats.average_ms ~ " ms", "Average response", "95 % under " ~ stats.p95_ms ~ " ms") }}
+        {{ stat(stats.client_errors, "User errors (4xx)", "e.g. wrong password, invalid photo") }}
+        {{ stat(stats.error_rate ~ "%", "Server errors (5xx)", stats.server_errors ~ " requests") }}
+    </section>
+    <div class="card">
+        <div class="card-header"><h2>Busiest endpoints</h2></div>
+        <div class="table-wrap">
+            <table class="table">
+                <tr><th>Method</th><th>Endpoint</th><th>Requests</th><th>Avg. ms</th><th>Max ms</th></tr>
+                {% for e in stats.endpoints %}
+                <tr><td><code>{{ e.method }}</code></td><td class="strong">{{ e.endpoint }}</td><td>{{ e.count }}</td><td>{{ e.average_ms }}</td><td>{{ e.max_ms }}</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    {% if stats.recent_errors %}
+    <div class="card">
+        <div class="card-header"><h2>Recent server errors</h2></div>
+        <div class="table-wrap"><table class="table">
+            {% for e in stats.recent_errors %}<tr><td>{{ e.time }}</td><td><code>{{ e.method }}</code> {{ e.endpoint }}</td><td>{{ e.status_code }}</td></tr>{% endfor %}
+        </table></div>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="card">{{ empty_state("activity", "No requests yet", "Requests appear here as soon as the app is used.") }}</div>
+    {% endif %}
+</div>
+{% endblock %}

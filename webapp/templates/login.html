@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block content %}
+<div class="card center-page">
+    <div class="card-header"><div><h2>Log in</h2><p class="muted">Citizens and municipality staff</p></div></div>
+    <form class="card-body form" method="post" data-loading="Logging in…">
+        <label class="field"><span>Username</span><input class="input" name="username" value="{{ old.get('username', '') }}" required {{ '' if old.get('username') else 'autofocus' }} autocomplete="username"></label>
+        <label class="field"><span>Password</span><input class="input" name="password" type="password" required autocomplete="current-password"></label>
+        <button class="btn btn-primary btn-block" type="submit">Log in</button>
+        <p class="muted">No account yet? <a href="{{ url_for('register') }}">Register</a></p>
+    </form>
+</div>
+{% endblock %}

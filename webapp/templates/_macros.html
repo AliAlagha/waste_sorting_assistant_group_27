@@ -1,0 +1,57 @@
+{# small pieces used on several pages: import with  {% from "_macros.html" import ... %} #}
+
+{% macro category_badge(category) -%}
+<span class="badge badge-{{ {'Recyclable': 'primary', 'Compostable': 'earth'}.get(category, 'gray') }}">{{ category }}</span>
+{%- endmacro %}
+
+{% macro bin_label(name) -%}
+<span class="bin-label"><i class="ti ti-trash"></i>{{ name }}</span>
+{%- endmacro %}
+
+{% macro empty_state(icon, title, text, link=None, link_text=None) -%}
+<div class="empty">
+    <div class="empty-icon"><i class="ti ti-{{ icon }}"></i></div>
+    <h3>{{ title }}</h3>
+    <p>{{ text }}</p>
+    {% if link %}<a class="btn btn-primary" href="{{ link }}">{{ link_text }}</a>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro delta(now, before, unit="") -%}
+{% if before is not none %}
+    {% set change = (now - before)|round(1) %}
+    <span class="delta {{ 'up' if change > 0 else ('down' if change < 0 else '') }}">
+        <i class="ti ti-{{ 'arrow-up-right' if change > 0 else ('arrow-down-right' if change < 0 else 'minus') }}"></i>{{ change|abs }}{{ unit }} vs. previous period
+    </span>
+{% endif %}
+{%- endmacro %}
+
+{% macro stat(value, label, note=None) -%}
+<div class="card stat">
+    <span class="stat-label">{{ label }}</span>
+    <span class="stat-value">{{ value }}</span>
+    {% if note %}<span class="stat-note">{{ note }}</span>{% endif %}
+    {{ caller() if caller }}
+</div>
+{%- endmacro %}
+
+{# city from a fixed list; street and house number from EDG's lists (only Dortmund has collection days) #}
+{% macro address_fields(regions, region, street, number, optional=True) -%}
+<div class="address" data-address>
+    <label class="field"><span>City</span>
+        <select class="input" name="region_name" data-region>
+            {% for r in regions %}<option {{ 'selected' if r == region }}>{{ r }}</option>{% endfor %}
+        </select>
+    </label>
+    <div class="row" data-street-row>
+        <label class="field"><span>Street{% if optional %} <small>(optional)</small>{% endif %}</span>
+            <input class="input" name="street" value="{{ street }}" list="street-list" autocomplete="off" placeholder="Start typing, e.g. Sonnen" data-street>
+            <datalist id="street-list"></datalist>
+        </label>
+        <label class="field"><span>No.</span>
+            <select class="input" name="house_number" data-number data-value="{{ number }}"><option value="">–</option></select>
+        </label>
+    </div>
+    <small class="field-hint" data-address-hint>Choose the street from the list. The address is only used for the collection days and never saved with your scans.</small>
+</div>
+{%- endmacro %}

@@ -1,0 +1,2 @@
+class RecommendationError(Exception):
+    pass

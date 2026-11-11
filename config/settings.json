@@ -1,0 +1,10 @@
+{
+  "model_path": "watersplash/waste-classification",
+  "confidence_threshold": 0.60,
+  "max_file_size_mb": 5,
+  "min_resolution": 64,
+  "allowed_formats": ["JPEG", "PNG"],
+  "top_k": 3,
+  "class_mapping_file": "config/class_to_category.json",
+  "default_category": "landfill"
+}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% from "_macros.html" import category_badge, bin_label %}
+{% block title %}Scan result{% endblock %}
+{% block content %}
+{% set c = result.classification %}
+{% set r = result.recommendation %}
+{% set percent = (c.confidence * 100)|round|int %}
+<div class="grid grid-2">
+    <div class="stack">
+        <div class="card">
+            <div class="card-header"><h2>AI classification</h2><span class="muted">{{ c.processing_ms }} ms · {{ c.model_version }}</span></div>
+            <div class="card-body">
+                <div class="result-head"><h2>{{ result.item_name|capitalize }}</h2>{% if r %}{{ category_badge(r.category) }}{% endif %}</div>
+                <div class="confidence"><div class="progress"><span style="width: {{ percent }}%"></span></div><b>{{ percent }}%</b> confidence</div>
+                {% if not result.certain %}
+                <div class="alert alert-danger"><i class="ti ti-alert-triangle"></i><span>{{ c.message }} Until it is confirmed, the grey bin is the safe choice.</span></div>
+                {% endif %}
+                <table class="predictions">
+                    {% for p in c.top3 %}
+                    <tr><td>{{ p.item }}</td><td><div class="progress"><span style="width: {{ (p.confidence * 100)|round|int }}%"></span></div></td><td>{{ (p.confidence * 100)|round|int }}%</td></tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <div class="card-footer"><a class="btn btn-light btn-sm" href="{{ url_for('scan') }}"><i class="ti ti-camera"></i>Scan another item</a></div>
+        </div>
+    </div>
+
+    <div class="stack">
+        {% if r %}
+        <div class="card">
+            <div class="card-header"><h2>What should I do?</h2><span class="muted">EDG rules, {{ r.region_name }}</span></div>
+            <div class="card-body">
+                <dl class="facts">
+                    <dt>Bin</dt><dd>{{ bin_label(r.bin_name) }}</dd>
+                    {% if r.tip %}<dt>Preparation</dt><dd>{{ r.tip }}</dd>{% endif %}
+                    <dt>Collection</dt>
+                    <dd>{% if r.next_pickup %}{{ r.pickup_day }}, {{ r.rhythm }} · next on <b>{{ r.next_pickup }}</b>
+                        {% elif r.rhythm %}emptied {{ r.rhythm }}; <a href="{{ url_for('bins') }}">your day depends on your address</a>
+                        {% else %}{{ r.pickup_day }}{% endif %}</dd>
+                </dl>
+            </div>
+        </div>
+        {% endif %}
+        {% if result.coach %}
+        <div class="card">
+            <div class="card-header"><h2>Sustainability coach</h2><span class="source"><i class="ti ti-sparkles"></i>{{ result.coach.source }}</span></div>
+            <div class="card-body"><p class="quote">{{ result.coach.text }}</p></div>
+        </div>
+        {% endif %}
+        {% for w in result.warnings %}<div class="alert alert-danger"><i class="ti ti-alert-circle"></i><span>{{ w }}</span></div>{% endfor %}
+    </div>
+</div>
+{% endblock %}

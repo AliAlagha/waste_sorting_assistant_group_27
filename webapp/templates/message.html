@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% from "_macros.html" import empty_state %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}<div class="card">{{ empty_state("mood-empty", title, text, url_for('index'), "Back to start") }}</div>{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Scan an item{% endblock %}
+{% block content %}
+<div class="card narrow">
+    <div class="card-header"><div><h2>Upload a photo</h2><p class="muted">JPEG or PNG, max. 5 MB, one item per photo</p></div></div>
+    <form class="card-body form" method="post" enctype="multipart/form-data" data-loading="Analysing your photo…">
+        <label id="drop-zone" class="drop-zone" for="image">
+            <img id="preview" alt="">
+            <span class="drop-text"><i class="ti ti-photo-up"></i><b>Click to take or choose a photo</b><br>or drop it here</span>
+            <input id="image" type="file" name="image" accept="image/jpeg,image/png" capture="environment" required>
+        </label>
+        <p id="file-info" class="file-info"></p>
+        <button id="scan-submit" class="btn btn-primary btn-block" type="submit" disabled><i class="ti ti-scan"></i>Classify</button>
+    </form>
+    <div class="card-footer muted"><i class="ti ti-map-pin"></i><span>The scan is counted for <b>{{ account.get_region_name() }}</b> (your city in <a href="{{ url_for('profile') }}">Account</a>). No photo and no address are stored.</span></div>
+</div>
+{% endblock %}

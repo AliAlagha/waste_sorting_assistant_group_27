@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% from "_macros.html" import category_badge, bin_label %}
+{% block title %}Sorting guide{% endblock %}
+{% block content %}
+<div class="stack">
+    <div class="card">
+        <div class="card-header"><div><h2>Ask the coach</h2><p class="muted">Questions about items that are not in the list. The answer uses the local rules below.</p></div>
+            <span class="source"><i class="ti ti-sparkles"></i>OpenAI</span></div>
+        <div class="card-body">
+            {% if account %}
+            <form id="ask-form" class="input-group">
+                <div class="input-icon" style="flex: 1"><i class="ti ti-message-question"></i>
+                    <input class="input" name="question" maxlength="300" placeholder="Where does a greasy pizza box go?" required></div>
+                <button class="btn btn-primary" type="submit" data-busy="Thinking…">Ask</button>
+            </form>
+            <div class="examples">Examples:
+                <button type="button" class="btn-link example-question">Where does a greasy pizza box go?</button>
+                <button type="button" class="btn-link example-question">What do I do with old medicine?</button>
+                <button type="button" class="btn-link example-question">Can a coffee cup go in the paper bin?</button>
+            </div>
+            <div id="answer" class="answer" hidden></div>
+            {% else %}
+            <p class="muted"><a href="{{ url_for('login') }}">Log in</a> or <a href="{{ url_for('register') }}">register</a> to ask your own questions.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="input-icon" style="flex: 1; max-width: 360px"><i class="ti ti-search"></i>
+            <input id="rule-search" class="input" type="search" placeholder="Search an item, e.g. glass" aria-label="Search"></div>
+        <div class="filters">
+            {% for value, label in [("all", "All"), ("Recyclable", "Recyclable"), ("Compostable", "Compostable"), ("Landfill", "Landfill")] %}
+            <button type="button" class="btn btn-light btn-sm filter {{ 'active' if value == 'all' }}" data-category="{{ value }}">{{ label }}</button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <section class="grid grid-3">
+        {% for r in rules %}
+        <div class="card rule" data-category="{{ r.category }}" data-search="{{ (r.item_name ~ ' ' ~ r.bin_name ~ ' ' ~ r.tip)|lower }}">
+            <div class="rule-head"><h3>{{ r.item_name|capitalize }}</h3>{{ category_badge(r.category) }}</div>
+            {{ bin_label(r.bin_name) }}
+            {% if r.tip %}<p>{{ r.tip }}</p>{% endif %}
+        </div>
+        {% endfor %}
+    </section>
+    <div id="no-rules" class="card empty" hidden>
+        <div class="empty-icon"><i class="ti ti-search"></i></div><h3>No rule found</h3>
+        <p>Ask the coach above. If you are not sure, the grey bin is the safe choice.</p>
+    </div>
+    <p class="muted">Source: EDG Entsorgung Dortmund, Abfall-ABC.</p>
+</div>
+{% endblock %}
