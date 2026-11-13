@@ -10,7 +10,7 @@ The image model is [`watersplash/waste-classification`](https://huggingface.co/w
 
 ## Presentation and video
 
-- Screencast (7 min): _add link here_
+- Screencast (7 min): _https://drive.google.com/file/d/1i8cN59VvnZpYHb6RMoPdndljpfLeEC6G/view?usp=sharing_
 - Final presentation: _add link / file here_
 
 ## Team
